@@ -1,0 +1,127 @@
+version: "3.8"
+
+services:
+
+  # 🟢 Angular base image
+  angular-base:
+    build:
+      context: ./frontend
+      dockerfile: docker/Dockerfile
+    image: angular-workspace
+
+  admin:
+    image: angular-workspace
+    ports:
+      - "4200:4200"
+    command: npx ng serve admin-panel --port 4200 --host 0.0.0.0
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  customer:
+    image: angular-workspace
+    ports:
+      - "4201:4201"
+    command: npx ng serve customer-app --port 4201 --host 0.0.0.0
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  vendor:
+    image: angular-workspace
+    ports:
+      - "4202:4202"
+    command: npx ng serve vendor-app --port 4202 --host 0.0.0.0
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  delivery:
+    image: angular-workspace
+    ports:
+      - "4203:4203"
+    command: npx ng serve delivery-app --port 4203 --host 0.0.0.0
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_NAME=nc_shopping_app
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_HOST=db
+      - REDIS_HOST=redis
+
+  worker:
+    build:
+      context: ./backend
+    command: python manage.py rqworker default
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_NAME=nc_shopping_app
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_HOST=db
+      - REDIS_HOST=redis
+
+  scheduler:
+    build:
+      context: ./backend
+    command: python manage.py rqscheduler
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_NAME=nc_shopping_app
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_HOST=db
+      - REDIS_HOST=redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    hostname: redis-commander
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: nc_shopping_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
