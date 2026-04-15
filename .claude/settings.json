@@ -24,7 +24,8 @@
       "Bash(venv/Scripts/python.exe -c \"import django; print\\(django.__version__\\)\")",
       "Bash(../venv/Scripts/python.exe manage.py test vendors.tests --settings=backend.test_settings --skip-checks --verbosity=2)",
       "Bash(grep -n \"class Address\" backend/accounts/models/*.py)",
-      "Bash(\"d:/Projects/NexConnect/shopping-app/venv/Scripts/python.exe\" manage.py test vendors.tests --settings=backend.test_settings --verbosity=2)"
+      "Bash(\"d:/Projects/NexConnect/shopping-app/venv/Scripts/python.exe\" manage.py test vendors.tests --settings=backend.test_settings --verbosity=2)",
+      "Bash(\"d:/Projects/NexConnect/shopping-app/venv/Scripts/python.exe\" manage.py test vendors.tests --settings=backend.test_settings --verbosity=0)"
     ],
     "additionalDirectories": [
       "C:\\Users\\haiia\\.gradle\\caches\\jars-9\\18366b31678c0171857be093a3b8ec22"
