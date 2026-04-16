@@ -24,6 +24,19 @@ python manage.py test [app].tests --settings=backend.test_settings
 
 # RQ worker (required for delivery assignment tasks)
 python manage.py rqworker default
+
+# RQ scheduler (required for recurring/deferred tasks e.g. payout generation)
+python manage.py rqscheduler
+```
+
+### Docker (local full-stack)
+
+```bash
+# Spin up everything: backend, worker, scheduler, redis, postgres, all angular apps
+docker-compose up --build
+
+# Backend only (with deps)
+docker-compose up backend worker scheduler redis db
 ```
 
 ### Frontend (Angular 19 monorepo)
@@ -61,20 +74,24 @@ npx cap open android
 
 ### Backend
 
-Six Django apps under `backend/`:
+Eight Django apps under `backend/`:
 
 | App | Responsibility |
 |---|---|
 | `accounts` | Custom User model (roles: customer/vendor/delivery/admin), addresses, JWT auth |
 | `products` | Categories (with subcategory support), products, reviews |
-| `orders` | Cart, order placement, order tracking |
+| `orders` | Cart, order placement, order tracking, coupons |
 | `vendors` | Vendor profiles, store management, vendor dashboard |
-| `delivery` | Delivery partner profiles, assignment search, location tracking |
+| `delivery` | Delivery partner profiles, assignment search, location tracking, assets, payouts |
 | `notifications` | In-app notifications (order/delivery/promo/system types) |
+| `support` | Customer support tickets and issue messaging (WebSocket-backed) |
+| `invoices` | PDF invoice generation for customer receipts, vendor settlements, delivery payouts |
 
 Admin-specific endpoints live in `backend/backend/admin_urls.py`, mounted at `/api/admin/`.
 
 **Infrastructure dependencies:** Redis is required for both RQ (background jobs) and Django Channels (WebSockets). Configured via `REDIS_HOST`/`REDIS_PORT` env vars (default: `localhost:6379`).
+
+**Database:** PostgreSQL by default (`DB_ENGINE`/`DB_NAME`/`DB_USER`/`DB_PASSWORD`/`DB_HOST`/`DB_PORT` env vars). Override `DB_ENGINE=django.db.backends.sqlite3` and `DB_NAME=db.sqlite3` locally if desired.
 
 #### Layered pattern — always follow this structure
 
@@ -82,7 +99,16 @@ Every app uses the same three-layer pattern. Never put business logic in views.
 
 - **`views/`** — HTTP only: parse request, call action or repo, return Response.
 - **`actions/`** — all business logic. Each action has a single `execute()` method. Import actions via the app's `actions/__init__.py`.
-- **`data/` (repositories)** — all ORM queries. Views/actions never call `Model.objects` directly; they go through a repository class that inherits `BaseRepository`.
+- **`data/` (repositories)** — all ORM queries. Views/actions never call `Model.objects` directly; they go through a repository class that inherits `BaseRepository` (defined in `vendors/data/base.py`). `BaseRepository` provides `get_by_id`, `create`, `filter`, `all` with optional `select_related`/`prefetch_related`.
+
+#### Shared helpers (`backend/helpers/`)
+
+Top-level package for cross-app utilities — import from here, not from `backend.utils` (shim only):
+
+- `helpers.geo_helpers.haversine` — Haversine distance between two lat/lng points
+- `helpers.request_helpers.get_client_ip` — extract real IP from request
+- `helpers.validators` — shared validation helpers
+- `helpers.view_helpers.BaseDetailView` — `get_object_or_none(model, **kwargs)` mixin for DRF views
 
 #### Import rules
 
@@ -115,7 +141,7 @@ Vendor-initiated — search does NOT auto-trigger on order placement or status c
 #### Custom signals (`backend/events.py`)
 
 Cross-app communication uses Django signals defined in `backend/backend/events.py`:
-`order_placed`, `order_cancelled`, `order_status_updated`, `vendor_approved`, `vendor_rejected`, `issue_created`, `issue_updated`.
+`order_placed`, `order_cancelled`, `order_status_updated`, `vendor_approved`, `vendor_rejected`, `issue_created`, `issue_updated`, `issue_message_added`, `support_ticket_created`, `support_ticket_updated`.
 
 #### WebSocket consumers
 
@@ -136,6 +162,7 @@ When patching `search_and_notify_partners` in tests, the patch target is `vendor
 
 | Prefix | Notes |
 |---|---|
+| `GET /health/` | Health check — returns `{"status": "ok"}` |
 | `POST /api/auth/register/` | Public |
 | `POST /api/auth/login/` | Public |
 | `GET\|PATCH /api/auth/profile/` | Authenticated |
@@ -153,10 +180,17 @@ When patching `search_and_notify_partners` in tests, the patch target is `vendor
 | `/api/orders/cart/` | `IsAuthenticated` |
 | `/api/orders/` | `IsAuthenticated` |
 | `/api/delivery/` | Mixed; `register/` returns 403 (disabled) |
+| `/api/notifications/` | `IsAuthenticated` |
+| `/api/support/` | `IsAuthenticated` |
+| `/api/invoices/` | `IsAuthenticated` |
 | `/api/admin/*` | `IsAdminRole` throughout |
+| `/api/admin/scheduled-tasks/` | Manage RQ scheduled jobs (list, create, cancel) |
+| `GET /api/schema/` | OpenAPI schema (drf-spectacular) |
+| `GET /api/docs/` | Swagger UI |
+| `GET /api/redoc/` | ReDoc UI |
 
 **IDs:** All primary keys are UUIDs. URL patterns use `<uuid:pk>` throughout.  
-**Database:** SQLite (`db.sqlite3`). Default pagination: 20 items/page.  
+**Default pagination:** 20 items/page.  
 **Filtering:** `DjangoFilterBackend`, `SearchFilter`, `OrderingFilter` configured globally — most list views expose `?search=`, `?ordering=`, and model-specific filter params.
 
 ### Frontend
@@ -200,4 +234,5 @@ All components are standalone (no NgModules). State is managed via Angular Signa
 |---|---|
 | Backend API | `http://localhost:8000/api/` |
 | Django Admin | `http://localhost:8000/admin/` |
+| API Docs (Swagger) | `http://localhost:8000/api/docs/` |
 | Production | `https://nex-connect.in/sa/api/` (reverse-proxied with `/sa/` prefix) |
