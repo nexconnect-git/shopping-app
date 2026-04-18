@@ -2,23 +2,6 @@ version: "3.8"
 
 services:
 
-  # ── One-shot: runs migrate + collectstatic once, then exits ──────────────
-  migrate:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py collectstatic --noinput"
-    volumes:
-      - back_static:/app/staticfiles
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file:
-      - .env
-    restart: "no"
-
   frontend:
     build:
       context: ./frontend
@@ -39,7 +22,15 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: daphne -b 0.0.0.0 -p 8000 backend.asgi:application
+    # migrate + collectstatic run every time the container starts so new
+    # migrations are applied automatically on every deploy without a separate
+    # manual step.  Django's migrate is idempotent — already-applied
+    # migrations are skipped and Postgres transactional DDL keeps concurrent
+    # runs safe if the container is ever scaled.
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 backend.asgi:application"
     volumes:
       - back_media:/app/media
       - back_static:/app/staticfiles
@@ -48,8 +39,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
     env_file:
       - .env
     restart: always
@@ -58,7 +47,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   worker:
     build:
@@ -66,12 +55,8 @@ services:
       dockerfile: Dockerfile
     command: python manage.py rqworker default
     depends_on:
-      db:
+      backend:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
     env_file:
       - .env
     restart: always
@@ -82,12 +67,8 @@ services:
       dockerfile: Dockerfile
     command: python manage.py rqscheduler
     depends_on:
-      db:
+      backend:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
     env_file:
       - .env
     restart: always
