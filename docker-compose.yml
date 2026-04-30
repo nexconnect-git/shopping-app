@@ -1,5 +1,17 @@
 version: "3.8"
 
+x-backend-env: &backend-env
+  DB_NAME: nc_shopping_app
+  DB_USER: postgres
+  DB_PASSWORD: admin
+  DB_HOST: db
+  REDIS_HOST: redis
+  DEBUG: "True"
+  SECRET_KEY: local-docker-dev-secret-key
+  ALLOWED_HOSTS: localhost,127.0.0.1,backend,[::1]
+  CORS_ALLOW_ALL_ORIGINS: "True"
+  INITIAL_SUPERUSER_SETUP_ENABLED: "${INITIAL_SUPERUSER_SETUP_ENABLED:-True}"
+
 services:
 
   # 🟢 Angular base image
@@ -56,12 +68,7 @@ services:
     depends_on:
       - db
       - redis
-    environment:
-      - DB_NAME=nc_shopping_app
-      - DB_USER=postgres
-      - DB_PASSWORD=admin
-      - DB_HOST=db
-      - REDIS_HOST=redis
+    environment: *backend-env
 
   worker:
     build:
@@ -72,12 +79,7 @@ services:
     depends_on:
       - db
       - redis
-    environment:
-      - DB_NAME=nc_shopping_app
-      - DB_USER=postgres
-      - DB_PASSWORD=admin
-      - DB_HOST=db
-      - REDIS_HOST=redis
+    environment: *backend-env
 
   scheduler:
     build:
@@ -88,12 +90,7 @@ services:
     depends_on:
       - db
       - redis
-    environment:
-      - DB_NAME=nc_shopping_app
-      - DB_USER=postgres
-      - DB_PASSWORD=admin
-      - DB_HOST=db
-      - REDIS_HOST=redis
+    environment: *backend-env
 
   redis:
     image: redis:7-alpine
