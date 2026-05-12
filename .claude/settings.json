@@ -46,7 +46,12 @@
       "Bash(node -e ' *)",
       "Bash(node -e \"const tw = require\\('tailwindcss/package.json'\\); console.log\\(tw.version\\)\")",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:4200/sa/showcase\")",
-      "Bash(pkill -f \"ng serve customer-app\")"
+      "Bash(pkill -f \"ng serve customer-app\")",
+      "Bash(docker volume *)",
+      "Bash(docker rmi *)",
+      "Bash(docker builder *)",
+      "WebFetch(domain:www.figma.com)",
+      "Read(//d/d/Projects/NexConnect/shopping-app/frontend/projects/**)"
     ],
     "additionalDirectories": [
       "C:\\Users\\haiia\\.gradle\\caches\\jars-9\\18366b31678c0171857be093a3b8ec22"
