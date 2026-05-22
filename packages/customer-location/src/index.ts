@@ -51,13 +51,6 @@ export interface LocationQueryInput {
   postalCode?: string | null;
 }
 
-export interface OsmTileDescriptor {
-  key: string;
-  url: string;
-  leftPercent: number;
-  topPercent: number;
-}
-
 export function hasGeoCoordinates(value: Partial<GeoCoordinates> | null | undefined): value is GeoCoordinates {
   return isValidLatitude(value?.latitude) && isValidLongitude(value?.longitude);
 }
@@ -140,39 +133,6 @@ export function buildCustomerLocationQuery(input?: LocationQueryInput | null): R
   const postalCode = source.postal_code || source.postalCode;
   if (postalCode) query['postal_code'] = postalCode;
   return query;
-}
-
-export function buildOsmEmbedUrl(coordinates: GeoCoordinates, options: { delta?: number; marker?: boolean } = {}): string {
-  const latitude = Number(coordinates.latitude);
-  const longitude = Number(coordinates.longitude);
-  const delta = Number.isFinite(options.delta) ? Number(options.delta) : 0.012;
-  const bbox = [
-    longitude - delta,
-    latitude - delta,
-    longitude + delta,
-    latitude + delta,
-  ].map((value) => value.toFixed(6)).join('%2C');
-  const marker = options.marker === false ? '' : `&marker=${latitude.toFixed(6)}%2C${longitude.toFixed(6)}`;
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik${marker}`;
-}
-
-export function buildOsmTileGrid(coordinates: GeoCoordinates, zoom = 15): OsmTileDescriptor[] {
-  const latRad = coordinates.latitude * Math.PI / 180;
-  const scale = 2 ** zoom;
-  const x = Math.floor((coordinates.longitude + 180) / 360 * scale);
-  const y = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * scale);
-  return [-1, 0, 1].flatMap((row) => [-1, 0, 1].map((col) => ({
-    key: `${zoom}-${row}-${col}`,
-    url: `https://tile.openstreetmap.org/${zoom}/${x + col}/${y + row}.png`,
-    leftPercent: (col + 1) * 33.333,
-    topPercent: (row + 1) * 33.333,
-  })));
-}
-
-export function fallbackMapUnavailableMessage(hasProviderKey: boolean): string {
-  return hasProviderKey
-    ? 'Map provider could not be loaded. Showing approximate map.'
-    : 'Map provider key is not configured. Showing approximate map.';
 }
 
 function coordinatesFromAddress(address?: AddressWithCoordinates | null): GeoCoordinates | null {
