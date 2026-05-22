@@ -4,6 +4,9 @@ services:
     build:
       context: .
       dockerfile: frontend/docker/Dockerfile.prod
+      args:
+        GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+        GOOGLE_MAPS_MAP_ID: ${GOOGLE_MAPS_MAP_ID:-}
     image: frontend-prod
     ports:
       - "80:80"
