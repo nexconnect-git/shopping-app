@@ -1,0 +1,27 @@
+# Keep production Docker contexts predictable and reasonably small.
+.git
+.github
+.agent
+.codex-artifacts
+.claude
+.vscode
+
+**/.angular
+**/.cache
+**/.pytest_cache
+**/__pycache__
+**/coverage
+**/dist
+**/node_modules
+**/out-tsc
+**/*.log
+
+backend/venv
+backend/.venv
+backend/media
+backend/staticfiles
+
+frontend/build.log
+frontend/build_err*.txt
+frontend/empty_scss.txt
+frontend/scss_files.txt
