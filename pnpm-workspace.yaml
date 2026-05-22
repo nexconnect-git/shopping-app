@@ -1,0 +1,4 @@
+packages:
+  - "packages/*"
+  - "frontend"
+  - "shopping-mobile-app/mobile-customer"

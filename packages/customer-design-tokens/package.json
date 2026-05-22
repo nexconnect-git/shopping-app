@@ -1,0 +1,30 @@
+{
+  "name": "@nexconnect/customer-design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./css/variables.css": "./css/variables.css",
+    "./css/angular-platform.css": "./css/angular-platform.css",
+    "./scss/variables": "./scss/_variables.scss",
+    "./scss/angular-platform": "./scss/_angular-platform.scss"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/*.mjs"
+  },
+  "files": [
+    "dist",
+    "src",
+    "css",
+    "scss",
+    "test"
+  ]
+}

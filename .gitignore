@@ -2,6 +2,7 @@
 .env
 *.env
 !.env.example
+frontend/projects/*/public/runtime-config.js
 
 # Python
 __pycache__/
@@ -41,3 +42,10 @@ tests/
 # OS
 .DS_Store
 Thumbs.db
+
+# Agent files
+.agent/
+.claude/
+.codex-artifacts/
+plans/
+
