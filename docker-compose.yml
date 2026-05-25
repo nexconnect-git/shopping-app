@@ -6,6 +6,7 @@ x-backend-env: &backend-env
   REDIS_HOST: redis
   DEBUG: "True"
   SECRET_KEY: local-docker-dev-secret-key
+  PUBLIC_BACKEND_URL: http://localhost:8000
   ALLOWED_HOSTS: localhost,127.0.0.1,backend,[::1],192.168.29.215
   CORS_ALLOW_ALL_ORIGINS: "True"
   RAZORPAY_KEY_ID: "${RAZORPAY_KEY_ID:-}"
@@ -76,6 +77,8 @@ services:
   backend:
     build:
       context: ./backend
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
@@ -89,6 +92,8 @@ services:
   worker:
     build:
       context: ./backend
+    env_file:
+      - .env
     command: python manage.py rqworker default
     volumes:
       - ./backend:/app
@@ -100,6 +105,8 @@ services:
   scheduler:
     build:
       context: ./backend
+    env_file:
+      - .env
     command: python manage.py rqscheduler
     volumes:
       - ./backend:/app
