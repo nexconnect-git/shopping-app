@@ -151,6 +151,10 @@ export function buildStoreDiscoveryQueryPlan(
 
   const fallbackToState = options.fallbackToState !== false;
   const hasPreciseLocation = primary['lat'] !== undefined && primary['lng'] !== undefined;
+  if (hasPreciseLocation) {
+    delete primary['city'];
+    delete primary['postal_code'];
+  }
   const state = location.state || primary['state'];
   if (!fallbackToState || !hasPreciseLocation || !state) return { primary };
 

@@ -4,6 +4,9 @@
 !.env.example
 frontend/projects/*/public/runtime-config.js
 
+# Documentation
+*.md
+
 # Python
 __pycache__/
 *.py[cod]
@@ -15,25 +18,38 @@ venv/
 *.sqlite3
 media/
 staticfiles/
+static/
+
+# Static/media assets
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.ico
+*.avif
+*.mp4
+*.mov
+*.webm
+*.woff
+*.woff2
+*.ttf
+*.otf
+
+# Tests and seed data
+**/test/
+**/tests/
+**/*.spec.*
+**/*.test.*
+**/test-*/
+**/*-test/
+**/*seed*
+**/*fixture*
 
 # Node
 node_modules/
 dist/
-
-# Tests
-test/
-tests/
-**/test/
-**/tests/
-**/tests.py
-**/tests_*.py
-**/test_*.py
-**/*_test.py
-**/*.spec.ts
-**/*.test.ts
-**/*.test.js
-**/*.test.jsx
-**/*.test.tsx
 
 # IDE
 .vscode/

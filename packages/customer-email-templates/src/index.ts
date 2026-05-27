@@ -67,7 +67,7 @@ export const CUSTOMER_EMAIL_TEMPLATE_TYPES: EmailTemplateType[] = [
   'account_suspended',
 ];
 
-export function emailTemplateSubject(type: EmailTemplateType, brandName = 'NexConnect'): string {
+export function emailTemplateSubject(type: EmailTemplateType, brandName = 'Nextou'): string {
   const subjects: Record<EmailTemplateType, string> = {
     customer_welcome: `Welcome to ${brandName}`,
     login_otp: `Your ${brandName} login OTP`,

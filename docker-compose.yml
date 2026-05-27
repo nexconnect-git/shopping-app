@@ -26,9 +26,10 @@ services:
     image: angular-workspace
     ports:
       - "4200:4200"
-    command: sh -c "npm install --prefer-offline --no-audit && node scripts/write-runtime-config.mjs admin-panel && npx ng serve admin-panel --port 4200 --host 0.0.0.0"
+    command: sh -c "npm ci --prefer-offline --no-audit && node scripts/write-runtime-config.mjs admin-panel && npx ng serve admin-panel --port 4200 --host 0.0.0.0"
     environment:
       API_PROXY_TARGET: http://backend:8000
+      API_PROXY_ALLOW_DOCKER_HOSTNAME: "true"
       GOOGLE_MAPS_API_KEY: "${GOOGLE_MAPS_API_KEY:-}"
     volumes:
       - ./frontend:/app
@@ -39,9 +40,10 @@ services:
     image: angular-workspace
     ports:
       - "4201:4201"
-    command: sh -c "npm install --prefer-offline --no-audit && node scripts/write-runtime-config.mjs customer-app && npx ng serve customer-app --port 4201 --host 0.0.0.0"
+    command: sh -c "npm ci --prefer-offline --no-audit && node scripts/write-runtime-config.mjs customer-app && npx ng serve customer-app --port 4201 --host 0.0.0.0"
     environment:
       API_PROXY_TARGET: http://backend:8000
+      API_PROXY_ALLOW_DOCKER_HOSTNAME: "true"
       GOOGLE_MAPS_API_KEY: "${GOOGLE_MAPS_API_KEY:-}"
     volumes:
       - ./frontend:/app
@@ -52,9 +54,10 @@ services:
     image: angular-workspace
     ports:
       - "4202:4202"
-    command: sh -c "npm install --prefer-offline --no-audit && node scripts/write-runtime-config.mjs vendor-app && npx ng serve vendor-app --port 4202 --host 0.0.0.0"
+    command: sh -c "npm ci --prefer-offline --no-audit && node scripts/write-runtime-config.mjs vendor-app && npx ng serve vendor-app --port 4202 --host 0.0.0.0"
     environment:
       API_PROXY_TARGET: http://backend:8000
+      API_PROXY_ALLOW_DOCKER_HOSTNAME: "true"
       GOOGLE_MAPS_API_KEY: "${GOOGLE_MAPS_API_KEY:-}"
     volumes:
       - ./frontend:/app
@@ -65,9 +68,10 @@ services:
     image: angular-workspace
     ports:
       - "4203:4203"
-    command: sh -c "npm install --prefer-offline --no-audit && node scripts/write-runtime-config.mjs delivery-app && npx ng serve delivery-app --port 4203 --host 0.0.0.0"
+    command: sh -c "npm ci --prefer-offline --no-audit && node scripts/write-runtime-config.mjs delivery-app && npx ng serve delivery-app --port 4203 --host 0.0.0.0"
     environment:
       API_PROXY_TARGET: http://backend:8000
+      API_PROXY_ALLOW_DOCKER_HOSTNAME: "true"
       GOOGLE_MAPS_API_KEY: "${GOOGLE_MAPS_API_KEY:-}"
     volumes:
       - ./frontend:/app
