@@ -5,7 +5,3 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/nexconnect-git/nexapp-shopping-ui.git
-
-[submodule "shopping-mobile-app"]
-	path = shopping-mobile-app
-	url = https://github.com/nexconnect-git/shopping-app.git
