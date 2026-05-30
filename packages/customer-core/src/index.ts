@@ -322,8 +322,8 @@ export interface DeliveryFeePreviewLike {
   requires_far_delivery_confirmation?: boolean;
 }
 
-export const DEFAULT_PRODUCT_IMAGE = 'assets/placeholders/product.svg';
-export const DEFAULT_STORE_IMAGE = 'assets/placeholders/store.svg';
+export const DEFAULT_PRODUCT_IMAGE = '/assets/placeholders/product.svg';
+export const DEFAULT_STORE_IMAGE = '/assets/placeholders/store.svg';
 export const CATEGORY_BACKGROUNDS = ['#ecfdf5', '#fff7ed', '#eff6ff', '#fdf2f8', '#f5f3ff', '#fefce8'];
 
 export function readApiError(raw: unknown): string {
