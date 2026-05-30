@@ -149,12 +149,12 @@ export function normalizeCheckoutPaymentMethod(method: string | PaymentMethodLik
 export function paymentMethodMeta(id: string): CheckoutPaymentMeta {
   const key = String(id || '').toLowerCase();
   if (key.includes('upi')) return { id, label: 'UPI', description: 'Pay securely with your UPI app', icon: 'UPI' };
-  if (key.includes('card')) return { id, label: 'Credit or Debit Card', description: 'Processed through Razorpay', icon: 'card' };
-  if (key.includes('wallet')) return { id, label: 'Wallet', description: 'Supported payment wallets', icon: 'wallet' };
-  if (key.includes('netbanking') || key.includes('bank')) return { id, label: 'Net Banking', description: 'All major banks supported', icon: 'bank' };
-  if (key === 'cod') return { id, label: 'Cash on Delivery', description: 'Pay using UPI at delivery', icon: 'rupee' };
-  if (key.includes('razorpay')) return { id, label: 'Online Payment', description: 'Cards, UPI, wallets and net banking', icon: 'razorpay' };
-  return { id: key || id, label: id || 'Payment method', description: 'Payment availability is set by admin', icon: 'rupee' };
+  if (key.includes('card')) return { id, label: 'Credit or Debit Card', description: 'Processed through Razorpay', icon: 'CC' };
+  if (key.includes('wallet')) return { id, label: 'Wallet', description: 'Supported payment wallets', icon: 'WL' };
+  if (key.includes('netbanking') || key.includes('bank')) return { id, label: 'Net Banking', description: 'All major banks supported', icon: 'NB' };
+  if (key === 'cod') return { id, label: 'Cash on Delivery', description: 'Pay using UPI at delivery', icon: '₹' };
+  if (key.includes('razorpay')) return { id, label: 'Online Payment', description: 'Cards, UPI, wallets and net banking', icon: 'RZ' };
+  return { id: key || id, label: id || 'Payment method', description: 'Payment availability is set by admin', icon: '₹' };
 }
 
 export function isUpiPaymentMethod(id: string): boolean {
@@ -175,12 +175,12 @@ export function paymentPanelTitle(id: string): string {
 export function paymentIconFor(id: string): string {
   const key = String(id || '').toLowerCase();
   if (key.includes('upi')) return 'UPI';
-  if (key.includes('card')) return 'card';
-  if (key.includes('wallet')) return 'wallet';
-  if (key.includes('netbanking') || key.includes('bank')) return 'bank';
-  if (key === 'cod') return 'rupee';
-  if (key.includes('razorpay')) return 'R';
-  return 'rupee';
+  if (key.includes('card')) return 'CC';
+  if (key.includes('wallet')) return 'WL';
+  if (key.includes('netbanking') || key.includes('bank')) return 'NB';
+  if (key === 'cod') return '₹';
+  if (key.includes('razorpay')) return 'RZ';
+  return '₹';
 }
 
 export function paymentMethodToOnlineGroup(id: string): 'razorpay' | 'cod' | string {
