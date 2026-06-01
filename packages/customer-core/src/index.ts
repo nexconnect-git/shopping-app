@@ -196,6 +196,9 @@ export interface CategoryLike {
 
 export interface ProductLike extends CartLikeItem {
   id?: string;
+  product_id?: string;
+  uuid?: string;
+  catalog_product_id?: string;
   name?: string;
   description?: string;
   price?: number | string | null;
@@ -480,14 +483,34 @@ export function normalizeProduct(product: ProductLike, vendor?: VendorLike, fall
   const storeId = vendorData?.id || (typeof product.vendor === 'string' ? product.vendor : '');
   const storeName = product.vendor_name || vendorData?.store_name || '';
   const category = product.category?.name || product.catalog_product?.category?.name || 'Products';
+  const source = product as ProductLike & Record<string, unknown>;
+  const embeddedProduct = source['product'] as
+    | { id?: string; uuid?: string; product_id?: string }
+    | string
+    | undefined;
+  const embeddedProductId =
+    typeof embeddedProduct === 'string'
+      ? embeddedProduct
+      : embeddedProduct?.id || embeddedProduct?.uuid || embeddedProduct?.product_id;
+  const canonicalId =
+    String(
+      product.id ||
+        product.product_id ||
+        product.uuid ||
+        product.catalog_product_id ||
+        embeddedProductId ||
+        source['product_uuid'] ||
+        source['productId'] ||
+        '',
+    ).trim() || 'product';
   const price = toNumber(product.price);
   const mrp = Math.max(toNumber(product.compare_price ?? product.price), price);
   const rawDiscount = toNumber(product.discount_percentage);
   const discount = rawDiscount > 0 ? `${Math.round(rawDiscount)}% OFF` : (mrp > price ? `${Math.round(((mrp - price) / mrp) * 100)}% OFF` : '');
   const catalogImage = product.catalog_product?.images?.find((image) => image.is_primary)?.image || product.catalog_product?.images?.[0]?.image;
   return {
-    id: product.id || 'product',
-    apiId: product.id || 'product',
+    id: canonicalId,
+    apiId: canonicalId,
     name: product.name || product.catalog_product?.name || 'Product',
     unit: product.unit || product.weight || product.catalog_product?.unit || '1 unit',
     price,
