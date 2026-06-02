@@ -6,6 +6,10 @@ frontend/projects/*/public/runtime-config.js
 
 # Documentation
 *.md
+!docs/*.md
+!AGENTS.md
+!CLAUDE.md
+!EC2_DEPLOYMENT_WORKFLOW.md
 
 # Python
 __pycache__/

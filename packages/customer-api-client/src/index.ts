@@ -105,6 +105,7 @@ export const CUSTOMER_API_ENDPOINTS = {
   productReviews: (id: string) => `/products/${id}/reviews/`,
   cart: '/orders/cart/',
   addToCart: '/orders/cart/add/',
+  replaceCart: '/orders/cart/replace/',
   cartItem: (id: string) => `/orders/cart/items/${id}/`,
   clearCart: '/orders/cart/clear/',
   deliveryFeePreview: '/orders/delivery-fee-preview/',
@@ -305,6 +306,7 @@ export function createCustomerApiClient(options: CustomerApiClientOptions) {
   const cart = {
     cart: () => request(CUSTOMER_API_ENDPOINTS.cart),
     addToCart: (productId: string, quantity = 1) => request(CUSTOMER_API_ENDPOINTS.addToCart, { method: 'POST', body: { product_id: productId, quantity } }),
+    replaceCart: (productId: string, quantity = 1) => request(CUSTOMER_API_ENDPOINTS.replaceCart, { method: 'POST', body: { product_id: productId, quantity } }),
     updateCartItem: (id: string, quantity: number) => request(CUSTOMER_API_ENDPOINTS.cartItem(id), { method: 'PATCH', body: { quantity } }),
     removeCartItem: (id: string) => request<void>(CUSTOMER_API_ENDPOINTS.cartItem(id), { method: 'DELETE' }),
     clearCart: () => request<void>(CUSTOMER_API_ENDPOINTS.clearCart, { method: 'DELETE' }),
