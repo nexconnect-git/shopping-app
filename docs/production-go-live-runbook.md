@@ -36,8 +36,8 @@ repeat the same gates against production before public traffic is enabled.
 
 The release is a no-go if any item below fails:
 
-- `python manage.py test --settings=backend.test_settings`
-- `python manage.py makemigrations --check --dry-run --settings=backend.test_settings`
+- `python manage.py check --settings=backend.config.local_sqlite`
+- `python manage.py makemigrations --check --dry-run --settings=backend.config.local_sqlite`
 - `npm audit --audit-level=high`
 - `npm run lint`
 - `npx ng build customer-app --configuration production`

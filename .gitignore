@@ -54,7 +54,6 @@ static/
 # Node
 node_modules/
 dist/
-shopping-mobile-app/
 
 # IDE
 .vscode/
@@ -68,4 +67,5 @@ Thumbs.db
 .agent/
 .claude/
 .codex-artifacts/
+.codex-run/
 plans/

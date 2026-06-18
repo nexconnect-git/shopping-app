@@ -148,6 +148,15 @@ export const CUSTOMER_API_ENDPOINTS = {
   issue: (id: string) => `/orders/issues/${id}/`,
   issueMessages: (id: string) => `/orders/issues/${id}/messages/`,
   issueAttachments: (id: string) => `/orders/issues/${id}/attachments/`,
+  customerHome: '/customer/home/',
+  customerServiceability: '/customer/location/serviceability/',
+  customerExplore: '/customer/explore/',
+  customerBuyAgain: '/customer/buy-again/',
+  customerCartSuggestions: '/customer/cart/suggestions/',
+  customerBestCoupon: '/customer/cart/apply-best-coupon/',
+  customerCheckoutSlots: '/customer/checkout/slots/',
+  customerActiveOrder: '/customer/orders/active/',
+  customerOrderConfirmation: (id: string) => `/customer/orders/${id}/confirmation/`,
 } as const;
 
 function withQuery(path: string, query?: RequestOptions['query']): string {
@@ -283,6 +292,10 @@ export function createCustomerApiClient(options: CustomerApiClientOptions) {
   };
 
   const catalog = {
+    home: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.customerHome, { query, auth: false }),
+    serviceability: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.customerServiceability, { query, auth: false }),
+    explore: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.customerExplore, { query, auth: false }),
+    buyAgain: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.customerBuyAgain, { query }),
     categories: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.categories, { query, auth: false }),
     vendors: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.vendors, { query, auth: false }),
     nearbyVendors: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.vendors, { query: { ...query, search_mode: 'nearby' }, auth: false }),
@@ -305,6 +318,8 @@ export function createCustomerApiClient(options: CustomerApiClientOptions) {
 
   const cart = {
     cart: () => request(CUSTOMER_API_ENDPOINTS.cart),
+    suggestions: () => request(CUSTOMER_API_ENDPOINTS.customerCartSuggestions),
+    bestCoupon: () => request(CUSTOMER_API_ENDPOINTS.customerBestCoupon),
     addToCart: (productId: string, quantity = 1) => request(CUSTOMER_API_ENDPOINTS.addToCart, { method: 'POST', body: { product_id: productId, quantity } }),
     replaceCart: (productId: string, quantity = 1) => request(CUSTOMER_API_ENDPOINTS.replaceCart, { method: 'POST', body: { product_id: productId, quantity } }),
     updateCartItem: (id: string, quantity: number) => request(CUSTOMER_API_ENDPOINTS.cartItem(id), { method: 'PATCH', body: { quantity } }),
@@ -316,6 +331,7 @@ export function createCustomerApiClient(options: CustomerApiClientOptions) {
     deliveryFeePreview: (addressId: string) => request(CUSTOMER_API_ENDPOINTS.deliveryFeePreview, { query: { address_id: addressId } }),
     checkoutPreview: (body: unknown) => request(CUSTOMER_API_ENDPOINTS.checkoutPreview, { method: 'POST', body }),
     availableSlots: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.availableSlots, { query }),
+    customerSlots: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.customerCheckoutSlots, { query }),
     paymentMethods: () => request(CUSTOMER_API_ENDPOINTS.paymentMethods),
     cancellationPolicy: () => request(CUSTOMER_API_ENDPOINTS.cancellationPolicy),
     coupons: () => request(CUSTOMER_API_ENDPOINTS.coupons),
@@ -329,6 +345,8 @@ export function createCustomerApiClient(options: CustomerApiClientOptions) {
   const orders = {
     orders: (status?: string) => request(CUSTOMER_API_ENDPOINTS.orders, { query: { status } }),
     order: (id: string) => request(CUSTOMER_API_ENDPOINTS.order(id)),
+    activeOrder: () => request(CUSTOMER_API_ENDPOINTS.customerActiveOrder),
+    confirmation: (id: string) => request(CUSTOMER_API_ENDPOINTS.customerOrderConfirmation(id)),
     orderTracking: (id: string) => request(CUSTOMER_API_ENDPOINTS.orderTracking(id)),
     reorder: (id: string) => request(CUSTOMER_API_ENDPOINTS.reorder(id), { method: 'POST', body: {} }),
     cancelOrder: (id: string) => request(CUSTOMER_API_ENDPOINTS.cancelOrder(id), { method: 'POST', body: {} }),

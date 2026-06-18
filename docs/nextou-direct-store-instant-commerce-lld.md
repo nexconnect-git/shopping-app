@@ -503,6 +503,6 @@ Notification channels:
 5. Add fuller server-side feature-flag enforcement for sensitive action boundaries.
 
 ## 12. Test Baseline Reality
-- No backend source tests are currently discovered by Django.
-- `backend/backend/test_settings.py` and `backend/backend/test_urls.py` now exist for Windows-safe checks/tests.
-- `python manage.py test --settings=backend.test_settings` currently runs system checks and reports zero tests.
+- No backend source tests are kept in the repository.
+- `backend.config.local_sqlite` is available for Windows-safe smoke checks.
+- `python manage.py check --settings=backend.config.local_sqlite` runs Django system checks without RQ fork usage.

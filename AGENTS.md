@@ -18,9 +18,8 @@ python manage.py migrate
 python manage.py makemigrations [app]
 python manage.py createsuperuser
 
-# Tests — must use test_settings on Windows (stubs rq/daphne which won't fork)
-python manage.py test vendors.tests --settings=backend.test_settings
-python manage.py test [app].tests --settings=backend.test_settings
+# Smoke check — Windows-safe settings stub rq/django_rq fork usage
+python manage.py check --settings=backend.config.local_sqlite
 
 # RQ worker (required for delivery assignment tasks)
 python manage.py rqworker default
@@ -56,18 +55,21 @@ npx ng lint [app-name]
 npx ng generate component pages/my-page --project=customer-app
 ```
 
-### Mobile (Capacitor — inside `shopping-mobile-app/`)
+### Mobile (Capacitor — inside `frontend/mobile-apps/`)
 
 ```bash
-# Build the Angular app first (outputs to frontend/dist/)
-cd frontend && npx ng build customer-app --configuration production
+# Validate Angular mobile builds
+cd frontend
+npm run mobile:customer:build
+npm run mobile:delivery:build
 
-# Then sync and open Android Studio
-cd ../shopping-mobile-app/mobile-customer
-npx cap sync android
-npx cap open android
+# Sync/open native wrappers
+npm run mobile:customer:sync
+npm run mobile:delivery:sync
+npm run mobile:customer:open:android
+npm run mobile:delivery:open:android
 
-# Delivery app uses mobile-delivery/ with appId com.nexconnect.delivery
+# App IDs: com.nextou.customer and com.nextou.delivery
 ```
 
 ## Architecture
@@ -103,7 +105,7 @@ Every app uses the same three-layer pattern. Never put business logic in views.
 
 #### Shared helpers (`backend/helpers/`)
 
-Top-level package for cross-app utilities — import from here, not from `backend.utils` (shim only):
+Top-level package for cross-app utilities — import from here:
 
 - `helpers.geo_helpers.haversine` — Haversine distance between two lat/lng points
 - `helpers.request_helpers.get_client_ip` — extract real IP from request
@@ -152,11 +154,9 @@ Mounted in `backend/backend/asgi.py`:
 
 All require `?token=<access_token>` query param for auth.
 
-#### Test settings
+#### Local smoke settings
 
-On Windows, `rq` fails to start because it requires `fork` (unavailable). Use `--settings=backend.test_settings` which stubs `rq`/`django_rq` with `MagicMock` and uses `ROOT_URLCONF = backend.test_urls` (excludes invoices/admin_urls that need optional production packages).
-
-When patching `search_and_notify_partners` in tests, the patch target is `vendors.actions.orders.search_and_notify_partners` (the bound top-level name), not `delivery.tasks.search_and_notify_partners`.
+On Windows, `rq` fails to start because it requires `fork` (unavailable). Use `--settings=backend.config.local_sqlite` for Django smoke checks; it stubs `rq`/`django_rq`, uses SQLite, and keeps bytecode/test artifacts out of the repository.
 
 ### Backend API Endpoints
 
