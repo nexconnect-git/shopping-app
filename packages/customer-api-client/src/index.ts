@@ -350,7 +350,7 @@ export function createCustomerApiClient(options: CustomerApiClientOptions) {
     orderTracking: (id: string) => request(CUSTOMER_API_ENDPOINTS.orderTracking(id)),
     reorder: (id: string) => request(CUSTOMER_API_ENDPOINTS.reorder(id), { method: 'POST', body: {} }),
     cancelOrder: (id: string) => request(CUSTOMER_API_ENDPOINTS.cancelOrder(id), { method: 'POST', body: {} }),
-    submitOrderRating: (id: string, rating: number) => request(CUSTOMER_API_ENDPOINTS.rateOrder(id), { method: 'POST', body: { rating } }),
+    submitOrderRating: (id: string, payload: unknown) => request(CUSTOMER_API_ENDPOINTS.rateOrder(id), { method: 'POST', body: typeof payload === 'number' ? { rating: payload } : payload }),
     tipDeliveryPartner: (id: string, amount: number) => request(CUSTOMER_API_ENDPOINTS.tipDeliveryPartner(id), { method: 'POST', body: { amount } }),
   };
 

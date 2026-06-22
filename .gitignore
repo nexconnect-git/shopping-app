@@ -54,6 +54,7 @@ static/
 # Node
 node_modules/
 dist/
+output/
 
 # IDE
 .vscode/

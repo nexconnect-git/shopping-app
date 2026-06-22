@@ -42,8 +42,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      recommendation:
+        condition: service_healthy
     env_file:
       - .env
+    environment:
+      RECOMMENDATION_SERVICE_URL: http://recommendation:8010
+      RECOMMENDATION_SERVICE_ENABLED: "True"
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
@@ -76,6 +81,49 @@ services:
       - .env
     restart: always
 
+  recommendation:
+    build:
+      context: ./recommendation-service
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      RECOMMENDER_MODEL_BACKEND: sklearn_hybrid
+      RECOMMENDER_MODEL_DIR: /models
+      RECOMMENDER_TRAIN_ON_STARTUP: "True"
+    volumes:
+      - recommendation_models:/models
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8010/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  recommendation-trainer:
+    build:
+      context: ./recommendation-service
+    command: python -m app.trainer --loop
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      RECOMMENDER_MODEL_BACKEND: sklearn_hybrid
+      RECOMMENDER_MODEL_DIR: /models
+      RECOMMENDER_TRAIN_INTERVAL_SECONDS: ${RECOMMENDER_TRAIN_INTERVAL_SECONDS:-3600}
+    volumes:
+      - recommendation_models:/models
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
   db:
     image: postgres:15-alpine
     restart: always
@@ -106,3 +154,4 @@ volumes:
   pgdata_prod:
   back_media:
   back_static:
+  recommendation_models:

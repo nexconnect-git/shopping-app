@@ -1,0 +1,1 @@
+"""Nextou recommendation microservice."""

@@ -12,6 +12,9 @@ x-backend-env: &backend-env
   RAZORPAY_KEY_ID: "${RAZORPAY_KEY_ID:-}"
   RAZORPAY_KEY_SECRET: "${RAZORPAY_KEY_SECRET:-}"
   RAZORPAY_WEBHOOK_SECRET: "${RAZORPAY_WEBHOOK_SECRET:-}"
+  RECOMMENDATION_SERVICE_URL: http://recommendation:8010
+  RECOMMENDATION_SERVICE_ENABLED: "True"
+  RECOMMENDATION_SERVICE_TIMEOUT_SECONDS: "1.5"
 
 services:
 
@@ -119,6 +122,45 @@ services:
       - redis
     environment: *backend-env
 
+  recommendation:
+    build:
+      context: ./recommendation-service
+    ports:
+      - "8010:8010"
+    environment:
+      DB_NAME: nc_shopping_app
+      DB_USER: postgres
+      DB_PASSWORD: admin
+      DB_HOST: db
+      DB_PORT: 5432
+      RECOMMENDER_MODEL_BACKEND: sklearn_hybrid
+      RECOMMENDER_MODEL_DIR: /models
+      RECOMMENDER_TRAIN_ON_STARTUP: "True"
+    volumes:
+      - recommendation_models:/models
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  recommendation-trainer:
+    build:
+      context: ./recommendation-service
+    command: python -m app.trainer --loop
+    environment:
+      DB_NAME: nc_shopping_app
+      DB_USER: postgres
+      DB_PASSWORD: admin
+      DB_HOST: db
+      DB_PORT: 5432
+      RECOMMENDER_MODEL_BACKEND: sklearn_hybrid
+      RECOMMENDER_MODEL_DIR: /models
+      RECOMMENDER_TRAIN_INTERVAL_SECONDS: 3600
+    volumes:
+      - recommendation_models:/models
+    depends_on:
+      - db
+    restart: unless-stopped
+
   redis:
     image: redis:7-alpine
     ports:
@@ -149,3 +191,4 @@ services:
 
 volumes:
   pgdata:
+  recommendation_models:
