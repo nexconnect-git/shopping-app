@@ -2,6 +2,13 @@
 
 Scope: `frontend/projects/customer-app/src/app`, `frontend/projects/customer-app/src/styles.scss`.
 
+Current strict pass notes:
+- Browser target: `http://localhost:4201/`.
+- Login handoff prepared with phone `6282611751` and email `haiiamnikhil@gmail.com`; OTP entry remains manual.
+- Confirmed mobile `/location`, `/`, `/explore`, `/cart`, `/orders`, `/account`, `/stores`, first store route, and first product route in the running browser.
+- New fixes from this pass: mobile location map/CTA layout, active-order floater hidden outside home, specific store route no longer falls back to the first cached store, and product/store/category pages no longer show the global route loader over usable content.
+- The running `4201` server did not always hot-load updated component CSS, so final confidence must come from build plus fresh browser reload/server validation.
+
 Status key:
 - `Fully rebuild` means HTML composition and SCSS must be redesigned; TypeScript business logic is preserved unless it directly blocks the UX.
 - `Structurally refactor` means keep the component/API responsibility but change layout, state presentation, accessibility, or shell wiring.
@@ -146,4 +153,3 @@ Status key:
 | Selector | Current finding | Action |
 | --- | --- | --- |
 | `fd-mobile-bottom-nav` | Only `mobile-ui/mobile-bottom-nav` now declares the selector. `shared/mobile-bottom-nav` files are deleted. | Keep consolidated mobile-ui implementation and ensure imports/templates reference only it |
-
