@@ -8,6 +8,11 @@ export const CustomerAnalyticsEvents = {
   SearchSubmitted: 'customer_search_submitted',
   CartItemAdded: 'customer_cart_item_added',
   CartItemUpdated: 'customer_cart_item_updated',
+  CartFulfillmentConflict: 'customer_cart_fulfillment_conflict',
+  CartFulfillmentInvalidated: 'customer_cart_fulfillment_invalidated',
+  CartFulfillmentKept: 'customer_cart_fulfillment_kept',
+  CartFulfillmentRehydrated: 'customer_cart_fulfillment_rehydrated',
+  CartFulfillmentRefreshFailed: 'customer_cart_fulfillment_refresh_failed',
   CouponApplied: 'customer_coupon_applied',
   CheckoutStarted: 'customer_checkout_started',
   PaymentStarted: 'customer_payment_started',
@@ -29,6 +34,44 @@ export interface CustomerAnalyticsPayloads {
   [CustomerAnalyticsEvents.SearchSubmitted]: { query: string; resultCount?: number };
   [CustomerAnalyticsEvents.CartItemAdded]: { productId: string; vendorId?: string; quantity: number; price?: number };
   [CustomerAnalyticsEvents.CartItemUpdated]: { productId: string; quantity: number };
+  [CustomerAnalyticsEvents.CartFulfillmentConflict]: {
+    existingNodeId?: string;
+    existingNodeName?: string;
+    incomingNodeId?: string;
+    incomingNodeName?: string;
+    trigger: 'add_to_cart' | 'location_change' | 'checkout' | 'unknown';
+    itemCount?: number;
+  };
+  [CustomerAnalyticsEvents.CartFulfillmentInvalidated]: {
+    previousNodeId?: string;
+    previousNodeName?: string;
+    nextNodeId?: string;
+    nextNodeName?: string;
+    trigger: 'location_change' | 'stale_banner' | 'replace_cart';
+    itemCount: number;
+  };
+  [CustomerAnalyticsEvents.CartFulfillmentKept]: {
+    previousNodeId?: string;
+    previousNodeName?: string;
+    nextNodeId?: string;
+    nextNodeName?: string;
+    trigger: 'location_change' | 'replace_cart';
+    itemCount: number;
+  };
+  [CustomerAnalyticsEvents.CartFulfillmentRehydrated]: {
+    nodeId: string;
+    nodeName?: string;
+    promiseId?: string;
+    expiresAt?: string;
+    itemCount: number;
+  };
+  [CustomerAnalyticsEvents.CartFulfillmentRefreshFailed]: {
+    nodeId?: string;
+    nodeName?: string;
+    promiseId?: string;
+    reason?: string;
+    itemCount: number;
+  };
   [CustomerAnalyticsEvents.CouponApplied]: { code: string; discount?: number };
   [CustomerAnalyticsEvents.CheckoutStarted]: { cartTotal: number; itemCount: number };
   [CustomerAnalyticsEvents.PaymentStarted]: { method: string; amount: number };
