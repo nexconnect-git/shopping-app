@@ -1,0 +1,109 @@
+name: CI and production deployment
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: Build and check ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: backend
+            context: backend
+            dockerfile: backend/Dockerfile
+          - app: frontend
+            context: .
+            dockerfile: frontend/docker/Dockerfile.prod
+          - app: recommendation
+            context: recommendation-service
+            dockerfile: recommendation-service/Dockerfile
+    env:
+      RELEASE_ID: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - name: Build production image
+        run: docker build --file '${{ matrix.dockerfile }}' --tag "nextou-${{ matrix.app }}:$RELEASE_ID" '${{ matrix.context }}'
+      - name: Check application
+        env:
+          APP: ${{ matrix.app }}
+        run: bash infra/cicd/check-image.sh "$APP" "nextou-$APP:$RELEASE_ID"
+      - name: Package tested image
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p artifacts
+          docker save "nextou-${{ matrix.app }}:$RELEASE_ID" | gzip -1 > "artifacts/${{ matrix.app }}.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          name: image-${{ matrix.app }}
+          path: artifacts/*.tar.gz
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to production server
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment:
+      name: production
+      url: https://nex-connect.in
+    concurrency:
+      group: nextou-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: ap-south-1
+      RELEASE_ID: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+      DEPLOY_BUCKET: ${{ vars.DEPLOY_BUCKET }}
+      DEPLOY_INSTANCE_ID: ${{ vars.DEPLOY_INSTANCE_ID }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: image-*
+          path: artifacts
+          merge-multiple: true
+      - name: Assemble immutable release
+        run: |
+          cp infra/cicd/deploy.py artifacts/deploy.py
+          python3 infra/cicd/package-release.py artifacts "$RELEASE_ID"
+          tar -czf release.tar.gz -C artifacts deploy.py release.json backend.tar.gz frontend.tar.gz recommendation.tar.gz
+      - name: Authenticate to AWS with GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: github-${{ github.run_id }}
+          aws-region: ap-south-1
+          allowed-account-ids: '622308589716'
+      - name: Upload and deploy checked release
+        run: bash infra/cicd/send-release.sh
+      - name: Verify public HTTPS applications
+        run: python3 infra/cicd/verify-public.py
+      - name: Record deployment
+        run: |
+          printf 'Deployed `%s` to `%s` in Mumbai.\n' "$RELEASE_ID" "$DEPLOY_INSTANCE_ID" >> "$GITHUB_STEP_SUMMARY"

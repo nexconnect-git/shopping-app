@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "2.2",
+  "description": "Deploy a checksum-verified GitHub release to the existing Nextou stack",
+  "parameters": {
+    "ReleaseId": {
+      "type": "String",
+      "allowedPattern": "^[0-9a-f]{40}-[0-9]+-[0-9]+$",
+      "interpolationType": "ENV_VAR"
+    },
+    "Checksum": {
+      "type": "String",
+      "allowedPattern": "^[0-9a-f]{64}$",
+      "interpolationType": "ENV_VAR"
+    }
+  },
+  "mainSteps": [
+    {
+      "action": "aws:runShellScript",
+      "name": "deployRelease",
+      "inputs": {
+        "timeoutSeconds": "1800",
+        "runCommand": [
+          "set -eu\numask 077\nrelease=\"/opt/nextou/releases/$SSM_ReleaseId\"\ninstall -d -m 700 \"$release\"\naws s3 cp \"s3://nextou-deployment-622308589716-ap-south-1/github-releases/$SSM_ReleaseId/release.tar.gz\" \"$release/release.tar.gz\" --region ap-south-1 --only-show-errors\nprintf '%s  %s\n' \"$SSM_Checksum\" \"$release/release.tar.gz\" | sha256sum -c -\npython3 - \"$release\" <<'PYCODE'\nimport sys, tarfile\nfrom pathlib import Path\nroot = Path(sys.argv[1])\nexpected = {'deploy.py', 'release.json', 'backend.tar.gz', 'frontend.tar.gz', 'recommendation.tar.gz'}\nwith tarfile.open(root / 'release.tar.gz', 'r:gz') as archive:\n    members = archive.getmembers()\n    if {m.name for m in members} != expected or len(members) != len(expected) or not all(m.isfile() for m in members):\n        raise ValueError('Unexpected release archive contents')\n    archive.extractall(root)\nPYCODE\npython3 \"$release/deploy.py\" \"$release\"\n"
+        ]
+      }
+    }
+  ]
+}
