@@ -29,6 +29,7 @@ class Settings:
     model_filename: str = os.environ.get("RECOMMENDER_MODEL_FILENAME", "sklearn_hybrid.joblib")
     trainer_interval_seconds: int = _int_env("RECOMMENDER_TRAIN_INTERVAL_SECONDS", 3600)
     train_on_startup: bool = _bool_env("RECOMMENDER_TRAIN_ON_STARTUP", False)
+    model_admin_token: str = os.environ.get('RECOMMENDER_ADMIN_TOKEN', '')
 
     @property
     def model_path(self) -> Path:

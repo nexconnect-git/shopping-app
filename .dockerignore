@@ -11,10 +11,28 @@
 **/.pytest_cache
 **/__pycache__
 **/coverage
+**/htmlcov
+**/.coverage
 **/dist
 **/node_modules
 **/out-tsc
 **/*.log
+
+# Tests, sample data, and generated validation artifacts
+.codex-run
+.codex-visual-validation
+browser-validation-shots
+docs/*-qa
+**/test
+**/tests
+**/e2e
+**/androidTest
+**/test-results
+**/playwright-report
+**/*.spec.*
+**/*.test.*
+**/test_*.py
+**/tests_*.py
 
 backend/venv
 backend/.venv

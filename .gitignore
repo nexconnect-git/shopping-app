@@ -51,6 +51,21 @@ static/
 **/*seed*
 **/*fixture*
 
+# Generated validation output
+*.log
+*.bak
+*.tmp
+coverage/
+htmlcov/
+.coverage
+coverage.xml
+test-results/
+playwright-report/
+.pytest_cache/
+browser-validation-shots/
+docs/*-qa/
+docs/*-qa-report.md
+
 # Node
 node_modules/
 dist/
@@ -69,4 +84,5 @@ Thumbs.db
 .claude/
 .codex-artifacts/
 .codex-run/
+.codex-visual-validation/
 plans/
