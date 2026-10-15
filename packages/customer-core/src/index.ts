@@ -67,7 +67,7 @@ export function deliveryFeeLabel(deliveryFee: number | string | null | undefined
   return fee > 0 ? `Rs ${fee}` : freeLabel;
 }
 
-export function handlingFeeForItems(items: CartLikeItem[], fee = 4): number {
+export function handlingFeeForItems(items: CartLikeItem[], fee = 0): number {
   return items.length ? fee : 0;
 }
 

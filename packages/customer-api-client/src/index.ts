@@ -77,6 +77,11 @@ export class CustomerApiError extends Error {
     super(message);
     this.name = 'CustomerApiError';
   }
+
+  /** Angular consumers use HttpErrorResponse.error to read field/code payloads. */
+  get error(): unknown {
+    return this.body;
+  }
 }
 
 export const CUSTOMER_API_ENDPOINTS = {
@@ -287,9 +292,10 @@ export function createCustomerApiClient(options: CustomerApiClientOptions) {
   };
 
   const account = {
-    addresses: () => request(CUSTOMER_API_ENDPOINTS.addresses),
+    addresses: (query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.addresses, { query }),
     createAddress: (body: unknown) => request(CUSTOMER_API_ENDPOINTS.addresses, { method: 'POST', body }),
     updateAddress: (id: string, body: unknown) => request(CUSTOMER_API_ENDPOINTS.address(id), { method: 'PUT', body }),
+    patchAddress: (id: string, body: unknown) => request(CUSTOMER_API_ENDPOINTS.address(id), { method: 'PATCH', body }),
     deleteAddress: (id: string) => request<void>(CUSTOMER_API_ENDPOINTS.address(id), { method: 'DELETE' }),
   };
 
@@ -347,13 +353,13 @@ export function createCustomerApiClient(options: CustomerApiClientOptions) {
   };
 
   const orders = {
-    orders: (status?: string) => request(CUSTOMER_API_ENDPOINTS.orders, { query: { status } }),
+    orders: (status?: string, query?: RequestOptions['query']) => request(CUSTOMER_API_ENDPOINTS.orders, { query: { ...query, status } }),
     order: (id: string) => request(CUSTOMER_API_ENDPOINTS.order(id)),
     activeOrder: () => request(CUSTOMER_API_ENDPOINTS.customerActiveOrder),
     confirmation: (id: string) => request(CUSTOMER_API_ENDPOINTS.customerOrderConfirmation(id)),
     orderTracking: (id: string) => request(CUSTOMER_API_ENDPOINTS.orderTracking(id)),
-    reorder: (id: string) => request(CUSTOMER_API_ENDPOINTS.reorder(id), { method: 'POST', body: {} }),
-    cancelOrder: (id: string) => request(CUSTOMER_API_ENDPOINTS.cancelOrder(id), { method: 'POST', body: {} }),
+    reorder: (id: string, preview = false) => request(CUSTOMER_API_ENDPOINTS.reorder(id), { method: 'POST', body: { preview } }),
+    cancelOrder: (id: string, reason = '') => request(CUSTOMER_API_ENDPOINTS.cancelOrder(id), { method: 'POST', body: { reason } }),
     submitOrderRating: (id: string, payload: unknown) => request(CUSTOMER_API_ENDPOINTS.rateOrder(id), { method: 'POST', body: typeof payload === 'number' ? { rating: payload } : payload }),
     tipDeliveryPartner: (id: string, amount: number) => request(CUSTOMER_API_ENDPOINTS.tipDeliveryPartner(id), { method: 'POST', body: { amount } }),
   };

@@ -1,0 +1,16 @@
+[Unit]
+Description=Nextou production shopping platform
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/nextou
+ExecStart=/usr/bin/docker compose -f compose.json up -d --wait --wait-timeout 300
+ExecStop=/usr/bin/docker compose -f compose.json stop --timeout 60
+TimeoutStartSec=360
+TimeoutStopSec=90
+
+[Install]
+WantedBy=multi-user.target

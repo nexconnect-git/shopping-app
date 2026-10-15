@@ -6,6 +6,16 @@
 .claude
 .vscode
 
+# Keep local credentials and environments out of the Docker build context.
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+venv
+.venv
+output
+.kiro
+
 **/.angular
 **/.cache
 **/.pytest_cache

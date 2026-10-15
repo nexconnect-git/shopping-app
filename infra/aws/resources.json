@@ -1,0 +1,50 @@
+{
+  "account": "622308589716",
+  "accountName": "Nikhil Pradeep",
+  "region": "ap-south-1",
+  "profile": "nexconnect-prod",
+  "instance": "i-0e5681a5cb534dde7",
+  "privateDns": "ip-172-31-41-114.ap-south-1.compute.internal",
+  "bucket": "nextou-deployment-622308589716-ap-south-1",
+  "role": "arn:aws:iam::622308589716:role/Nextou-Production-EC2",
+  "securityGroup": "sg-02d453060abc0d4d6",
+  "eip": {
+    "AllocationId": "eipalloc-0c7465667c7caa573",
+    "PublicIpv4Pool": "amazon",
+    "NetworkBorderGroup": "ap-south-1",
+    "Domain": "vpc",
+    "PublicIp": "13.200.169.80"
+  },
+  "domainSuffix": "nex-connect.in",
+  "urls": {
+    "customer": "https://customer.nex-connect.in",
+    "vendor": "https://vendor.nex-connect.in",
+    "delivery": "https://delivery.nex-connect.in",
+    "admin": "https://admin.nex-connect.in"
+  },
+  "hosting": "EC2 HTTPS; CloudFront verification blocked",
+  "trail": "arn:aws:cloudtrail:ap-south-1:622308589716:trail/nextou-production",
+  "freshDatabase": true,
+  "certificateExpires": "2027-01-01",
+  "instanceProfile": "arn:aws:iam::622308589716:instance-profile/Nextou-Production-EC2",
+  "temporaryUrls": {
+    "customer": "https://customer.13-200-169-80.sslip.io",
+    "vendor": "https://vendor.13-200-169-80.sslip.io",
+    "delivery": "https://delivery.13-200-169-80.sslip.io",
+    "admin": "https://admin.13-200-169-80.sslip.io"
+  },
+  "websiteUrl": "https://nex-connect.in",
+  "additionalPublicUrls": [
+    "https://nex-connect.in",
+    "https://www.nex-connect.in",
+    "https://customer.13-200-169-80.sslip.io",
+    "https://vendor.13-200-169-80.sslip.io",
+    "https://delivery.13-200-169-80.sslip.io",
+    "https://admin.13-200-169-80.sslip.io"
+  ],
+  "additionalHostMap": {
+    "vendor.13-200-169-80.sslip.io": "vendor",
+    "delivery.13-200-169-80.sslip.io": "delivery",
+    "admin.13-200-169-80.sslip.io": "admin"
+  }
+}

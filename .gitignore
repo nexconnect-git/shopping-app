@@ -52,6 +52,7 @@ static/
 **/*fixture*
 
 # Generated validation output
+artifacts/
 *.log
 *.bak
 *.tmp

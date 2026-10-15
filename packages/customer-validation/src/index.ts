@@ -125,7 +125,8 @@ export function isCustomerAddressComplete(address: Record<string, unknown> | nul
 }
 
 export function validateAddressType(value: string | null | undefined): ValidationResult {
-  const normalized = compact(value).toLowerCase();
+  const label = compact(value).toLowerCase();
+  const normalized = label === 'office' ? 'work' : label;
   if (!normalized) return 'Address type is required.';
   return ['home', 'work', 'other'].includes(normalized) ? null : 'Address type must be home, work, or other.';
 }

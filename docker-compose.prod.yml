@@ -8,8 +8,9 @@ services:
         GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
         GOOGLE_MAPS_MAP_ID: ${GOOGLE_MAPS_MAP_ID:-}
     image: frontend-prod
-    env_file:
-      - .env
+    environment:
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      GOOGLE_MAPS_MAP_ID: ${GOOGLE_MAPS_MAP_ID:-}
     ports:
       - "80:80"
     volumes:
@@ -35,14 +36,12 @@ services:
              python manage.py collectstatic --noinput &&
              daphne -b 0.0.0.0 -p 8000 backend.config.asgi:application"
     volumes:
-      - back_media:/app/media
-      - back_static:/app/staticfiles
+      - back_media:/app/backend/media
+      - back_static:/app/backend/staticfiles
     depends_on:
       db:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      recommendation:
         condition: service_healthy
     env_file:
       - .env
@@ -51,7 +50,7 @@ services:
       RECOMMENDATION_SERVICE_ENABLED: "True"
     restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      test: ["CMD-SHELL", "curl -fsS -H 'X-Forwarded-Proto: https' -H \"Host: $${ALLOWED_HOSTS%%,*}\" http://localhost:8000/health/ready/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -62,6 +61,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     command: python manage.py rqworker default
+    volumes:
+      - back_media:/app/backend/media
     depends_on:
       backend:
         condition: service_healthy
@@ -74,6 +75,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     command: python manage.py rqscheduler
+    volumes:
+      - back_media:/app/backend/media
     depends_on:
       backend:
         condition: service_healthy
@@ -96,6 +99,8 @@ services:
       - recommendation_models:/models
     depends_on:
       db:
+        condition: service_healthy
+      backend:
         condition: service_healthy
     restart: always
     healthcheck:
@@ -121,6 +126,8 @@ services:
       - recommendation_models:/models
     depends_on:
       db:
+        condition: service_healthy
+      backend:
         condition: service_healthy
     restart: always
 
